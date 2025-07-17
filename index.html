@@ -1,211 +1,296 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Malla Ingeniería Civil - UNC</title>
-  <style>
-    body {
-      background: #f2f4f8;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 1.5rem;
-      margin: 0;
-    }
-    h1 {
-      text-align: center;
-      background: #1e2a38;
-      color: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-    }
+<meta charset="UTF-8" />
+<title>Malla Ingeniería Civil - UNC</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: #121921;
+    color: #cfd8dc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 1rem 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    color: #82c91e;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    user-select: none;
+    letter-spacing: 1.2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(11, minmax(130px, 1fr));
+    gap: 0.8rem 1rem;
+    width: 100%;
+    max-width: 1400px;
+  }
+  .semester {
+    background: #1e2733;
+    border-radius: 8px;
+    padding: 0.6rem 0.5rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    box-shadow: 0 0 10px #0009 inset;
+    min-height: 420px;
+  }
+  .semester h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.8rem 0;
+    color: #82c91e;
+    border-bottom: 1.5px solid #82c91e;
+    padding-bottom: 0.25rem;
+    width: 90%;
+    text-align: center;
+  }
+  .subject {
+    background: #26374a;
+    color: #cfd8dc;
+    margin: 0.3rem 0;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    width: 90%;
+    text-align: center;
+    transition: background-color 0.25s ease, box-shadow 0.2s ease;
+    position: relative;
+    user-select: none;
+    box-shadow: 0 1px 3px #0008;
+  }
+  .subject:hover:not(.locked):not(.approved) {
+    background-color: #3a536b;
+    box-shadow: 0 0 8px #82c91eaa;
+  }
+  .subject.approved {
+    background-color: #4caf50;
+    color: #e8f5e9;
+    text-decoration: line-through;
+    cursor: pointer;
+    box-shadow: 0 0 10px #4caf50cc;
+  }
+  .subject.locked {
+    background-color: #555f68;
+    color: #999ea6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .subject.locked:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333f4fdd;
+    color: #d0d0d0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    pointer-events: none;
+    margin-top: 6px;
+    z-index: 20;
+    box-shadow: 0 2px 8px #000a;
+    user-select: none;
+  }
+  @media (max-width: 1120px) {
     .grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      overflow-x: auto;
     }
-    .semester {
-      background: #e1eaf2;
-      padding: 0.5rem;
-      border-radius: 10px;
-    }
-    .semester h2 {
-      text-align: center;
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-    }
-    .subject {
-      background: #2b3e50;
-      color: white;
-      margin: 0.3rem 0;
-      padding: 0.6rem;
-      border-radius: 8px;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.2s;
-    }
-    .subject:hover {
-      background: #34495e;
-    }
-    .subject.approved {
-      background: #27ae60;
-      text-decoration: line-through;
-    }
-    .subject.locked {
-      background: #7f8c8d;
-      color: #ccc;
-      cursor: not-allowed;
-    }
-    .subject.locked:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      background: #333;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 0.8rem;
-      white-space: nowrap;
-      top: 100%;
-      left: 0;
-      margin-top: 4px;
-      z-index: 10;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <h1>Malla Interactiva - Ingeniería Civil UNC</h1>
-  <div class="grid" id="malla"></div>
-  <script>
-    const materias = [
-      { id: 'ambientacion', nombre: 'Ambientación Universitaria', semestre: 1, requisitos: [] },
-      { id: 'fyq', nombre: 'Física y Química', semestre: 1, requisitos: [] },
-      { id: 'matematica', nombre: 'Matemática', semestre: 1, requisitos: [] },
 
-      { id: 'am1', nombre: 'Análisis Matemático I', semestre: 2, requisitos: ['matematica'] },
-      { id: 'introIng', nombre: 'Introducción a la Ingeniería', semestre: 2, requisitos: ['ambientacion'] },
-      { id: 'quimica', nombre: 'Química', semestre: 2, requisitos: ['matematica', 'fyq'] },
-      { id: 'economia', nombre: 'Economía', semestre: 2, requisitos: ['matematica'] },
+<h1>Malla Interactiva - Ingeniería Civil UNC</h1>
 
-      { id: 'algebra', nombre: 'Álgebra Lineal', semestre: 3, requisitos: ['matematica'] },
-      { id: 'fisica1', nombre: 'Física I', semestre: 3, requisitos: ['fyq', 'am1'] },
-      { id: 'sistRep', nombre: 'Sistemas de Representación', semestre: 3, requisitos: [] },
-      { id: 'ingles', nombre: 'Módulo de Inglés', semestre: 3, requisitos: [] },
+<div class="grid" id="malla"></div>
 
-      { id: 'am2', nombre: 'Análisis Matemático II', semestre: 4, requisitos: ['am1', 'algebra'] },
-      { id: 'pyestad', nombre: 'Probabilidad y Estadística', semestre: 4, requisitos: ['am1'] },
-      { id: 'estatica', nombre: 'Estática', semestre: 4, requisitos: ['fisica1'] },
-      { id: 'topo1', nombre: 'Topografía Básica', semestre: 4, requisitos: ['matematica', 'sistRep'] },
+<script>
+  // Materias con sus semestres y correlativas
+  // semestre 1: Ingreso
+  const materias = [
+    // Ingreso
+    { id: 'ambientacion', nombre: 'Ambientación Universitaria', semestre: 1, requisitos: [] },
+    { id: 'fyq', nombre: 'Física y Química', semestre: 1, requisitos: [] },
+    { id: 'matematica', nombre: 'Matemática', semestre: 1, requisitos: [] },
 
-      { id: 'fisica2', nombre: 'Física II', semestre: 5, requisitos: ['fisica1', 'algebra'] },
-      { id: 'compu', nombre: 'Computación y Cálculo Numérico', semestre: 5, requisitos: ['am1', 'algebra'] },
-      { id: 'mecEstruct', nombre: 'Mecánica de las Estructuras', semestre: 5, requisitos: ['estatica', 'am2'] },
-      { id: 'topo2', nombre: 'Topografía Aplicada', semestre: 5, requisitos: ['topo1'] },
+    // 1º Semestre - Primer Año (semestre 2)
+    { id: 'am1', nombre: 'Análisis Matemático I', semestre: 2, requisitos: ['matematica'] },
+    { id: 'introIng', nombre: 'Introducción a la Ingeniería', semestre: 2, requisitos: ['ambientacion'] },
+    { id: 'quimica', nombre: 'Química', semestre: 2, requisitos: ['matematica', 'fyq'] },
+    { id: 'economia', nombre: 'Economía', semestre: 2, requisitos: ['matematica'] },
 
-      { id: 'geologia', nombre: 'Ingeniería Geológica y Geotécnica', semestre: 6, requisitos: ['fyq'] },
-      { id: 'transporte1', nombre: 'Planificación y Operación del Transporte', semestre: 6, requisitos: ['pyestad', 'economia'] },
-      { id: 'matConst', nombre: 'Tecnología de los Materiales', semestre: 6, requisitos: ['estatica', 'quimica'] },
-      { id: 'fluido', nombre: 'Mecánica de los Fluidos', semestre: 6, requisitos: ['fisica1', 'am2'] },
+    // 2º Semestre - Primer Año (semestre 3)
+    { id: 'algebra', nombre: 'Álgebra Lineal', semestre: 3, requisitos: ['matematica'] },
+    { id: 'fisica1', nombre: 'Física I', semestre: 3, requisitos: ['fyq', 'am1'] },
+    { id: 'sistRep', nombre: 'Sistemas de Representación', semestre: 3, requisitos: [] },
+    { id: 'ingles', nombre: 'Módulo de Inglés', semestre: 3, requisitos: [] },
 
-      { id: 'tecConst', nombre: 'Tecnología de la Construcción', semestre: 7, requisitos: ['sistRep', 'matConst'] },
-      { id: 'analisisEstruc', nombre: 'Análisis Estructural', semestre: 7, requisitos: ['mecEstruct'] },
-      { id: 'suelos', nombre: 'Mecánica de Suelos y Rocas', semestre: 7, requisitos: ['estatica', 'geologia'] },
-      { id: 'instSanit', nombre: 'Instalaciones Sanitarias y Eléctricas', semestre: 7, requisitos: ['fisica2'] },
+    // 3º Semestre - Segundo Año (semestre 4)
+    { id: 'am2', nombre: 'Análisis Matemático II', semestre: 4, requisitos: ['am1', 'algebra'] },
+    { id: 'pyestad', nombre: 'Probabilidad y Estadística', semestre: 4, requisitos: ['am1'] },
+    { id: 'estatica', nombre: 'Estática', semestre: 4, requisitos: ['fisica1'] },
+    { id: 'topo1', nombre: 'Topografía Básica', semestre: 4, requisitos: ['matematica', 'sistRep'] },
 
-      { id: 'hidro', nombre: 'Hidrología y Procesos Hidráulicos', semestre: 8, requisitos: ['fluido', 'geologia'] },
-      { id: 'instGas', nombre: 'Instalaciones de Gas y Termomecánicas', semestre: 8, requisitos: ['quimica', 'instSanit'] },
-      { id: 'gestionAmb', nombre: 'Ingeniería y Gestión Ambiental', semestre: 8, requisitos: ['fluido', 'quimica'] },
-      { id: 'disArq', nombre: 'Diseño Arquitectónico', semestre: 8, requisitos: ['tecConst'] },
-      { id: 'elasticidad', nombre: 'Elasticidad y Estructuras Laminares', semestre: 8, requisitos: ['analisisEstruc'] },
+    // 4º Semestre - Segundo Año (semestre 5)
+    { id: 'fisica2', nombre: 'Física II', semestre: 5, requisitos: ['fisica1', 'algebra'] },
+    { id: 'compu', nombre: 'Computación y Cálculo Numérico', semestre: 5, requisitos: ['am1', 'algebra'] },
+    { id: 'mecEstruct', nombre: 'Mecánica de las Estructuras', semestre: 5, requisitos: ['estatica', 'am2'] },
+    { id: 'topo2', nombre: 'Topografía Aplicada', semestre: 5, requisitos: ['topo1'] },
 
-      { id: 'infraTransp', nombre: 'Diseño de Infraestructura del Transporte', semestre: 9, requisitos: ['transporte1','hidro','topo2'] },
-      { id: 'hormigon', nombre: 'Hormigón Armado y Pretensado', semestre: 9, requisitos: ['mecEstruct','matConst'] },
-      { id: 'estructMet', nombre: 'Estructuras Metálicas y de Madera', semestre: 9, requisitos: ['analisisEstruc'] },
-      { id: 'legalEtica', nombre: 'Ingeniería Legal y Ética', semestre: 9, requisitos: ['topo2','disArq','introIng'] },
+    // 5º Semestre - Tercer Año (semestre 6)
+    { id: 'geologia', nombre: 'Ingeniería Geológica y Geotécnica', semestre: 6, requisitos: ['fyq'] },
+    { id: 'transporte1', nombre: 'Planificación y Operación del Transporte', semestre: 6, requisitos: ['pyestad', 'economia'] },
+    { id: 'matConst', nombre: 'Tecnología de los Materiales', semestre: 6, requisitos: ['estatica', 'quimica'] },
+    { id: 'fluido', nombre: 'Mecánica de los Fluidos', semestre: 6, requisitos: ['fisica1', 'am2'] },
 
-      { id: 'infraConstruccion', nombre: 'Construcción de Infraestructura del Transporte', semestre: 10, requisitos: ['suelos','infraTransp'] },
-      { id: 'sanitaria', nombre: 'Ingeniería Sanitaria', semestre: 10, requisitos: ['hidro','quimica'] },
-      { id: 'cimentaciones', nombre: 'Cimentaciones y Obras Geotécnicas', semestre: 10, requisitos: ['suelos','hormigon'] },
-      { id: 'proyectoDir', nombre: 'Proyecto, Dirección de Obras y Valuaciones', semestre: 10, requisitos: ['economia','legalEtica'] },
-      { id: 'disEstruc', nombre: 'Diseño de Estructuras', semestre: 10, requisitos: ['analisisEstruc','hormigon'] },
-      { id: 'hidraulicas', nombre: 'Obras Hidráulicas', semestre: 10, requisitos: ['hidro','suelos'] },
-      { id: 'higiene', nombre: 'Higiene y Seguridad', semestre: 10, requisitos: ['tecConst','legalEtica'] },
-      { id: 'urbanismo', nombre: 'Planeamiento y Urbanismo', semestre: 10, requisitos: ['disArq','transporte1'] },
-    ];
+    // 6º Semestre - Tercer Año (semestre 7)
+    { id: 'tecConst', nombre: 'Tecnología de la Construcción', semestre: 7, requisitos: ['sistRep', 'matConst'] },
+    { id: 'analisisEstruc', nombre: 'Análisis Estructural', semestre: 7, requisitos: ['mecEstruct'] },
+    { id: 'suelos', nombre: 'Mecánica de Suelos y Rocas', semestre: 7, requisitos: ['estatica', 'geologia'] },
+    { id: 'instSanit', nombre: 'Instalaciones Sanitarias y Eléctricas', semestre: 7, requisitos: ['fisica2'] },
 
-    const grid = document.getElementById('malla');
+    // 7º Semestre - Cuarto Año (semestre 8)
+    { id: 'hidro', nombre: 'Hidrología y Procesos Hidráulicos', semestre: 8, requisitos: ['fluido', 'geologia'] },
+    { id: 'instGas', nombre: 'Instalaciones de Gas y Termomecánicas', semestre: 8, requisitos: ['quimica', 'instSanit'] },
+    { id: 'gestionAmb', nombre: 'Ingeniería y Gestión Ambiental', semestre: 8, requisitos: ['fluido', 'quimica'] },
+    { id: 'disArq', nombre: 'Diseño Arquitectónico', semestre: 8, requisitos: ['tecConst'] },
+    { id: 'elasticidad', nombre: 'Elasticidad y Estructuras Laminares', semestre: 8, requisitos: ['analisisEstruc'] },
 
-    const labels = [
-      "Ingreso",
-      "1º Semestre",
-      "2º Semestre",
-      "3º Semestre",
-      "4º Semestre",
-      "5º Semestre",
-      "6º Semestre",
-      "7º Semestre",
-      "8º Semestre",
-      "9º Semestre",
-      "10º Semestre"
-    ];
-    labels.forEach((label, i) => {
-      const col = document.createElement("div");
-      col.className = "semester";
-      col.dataset.semestre = i + 1;
-      col.innerHTML = `<h2>${label}</h2>`;
-      grid.appendChild(col);
+    // 8º Semestre - Cuarto Año (semestre 9)
+    { id: 'infraTransp', nombre: 'Diseño de Infraestructura del Transporte', semestre: 9, requisitos: ['transporte1', 'hidro', 'topo2'] },
+    { id: 'hormigon', nombre: 'Hormigón Armado y Pretensado', semestre: 9, requisitos: ['mecEstruct', 'matConst'] },
+    { id: 'estructMet', nombre: 'Estructuras Metálicas y de Madera', semestre: 9, requisitos: ['analisisEstruc'] },
+    { id: 'legalEtica', nombre: 'Ingeniería Legal y Ética', semestre: 9, requisitos: ['topo2', 'disArq', 'introIng'] },
+
+    // 9º Semestre - Quinto Año (semestre 10)
+    { id: 'infraConstruccion', nombre: 'Construcción de Infraestructura del Transporte', semestre: 10, requisitos: ['suelos', 'infraTransp'] },
+    { id: 'sanitaria', nombre: 'Ingeniería Sanitaria', semestre: 10, requisitos: ['hidro', 'quimica'] },
+    { id: 'cimentaciones', nombre: 'Cimentaciones y Obras Geotécnicas', semestre: 10, requisitos: ['suelos', 'hormigon'] },
+    { id: 'proyectoDir', nombre: 'Proyecto, Dirección de Obras y Valuaciones', semestre: 10, requisitos: ['economia', 'legalEtica'] },
+    { id: 'disEstruc', nombre: 'Diseño de Estructuras', semestre: 10, requisitos: ['analisisEstruc', 'hormigon'] },
+    { id: 'hidraulicas', nombre: 'Obras Hidráulicas', semestre: 10, requisitos: ['hidro', 'suelos'] },
+    { id: 'higiene', nombre: 'Higiene y Seguridad', semestre: 10, requisitos: ['tecConst', 'legalEtica'] },
+    { id: 'urbanismo', nombre: 'Planeamiento y Urbanismo', semestre: 10, requisitos: ['disArq', 'transporte1'] },
+
+    // Extra - Práctica Supervisada (en 10º semestre, con requisito especial)
+    { id: 'practica', nombre: 'Práctica Supervisada', semestre: 10, requisitos: [], requierePorcentaje: 85 }
+  ];
+
+  const grid = document.getElementById('malla');
+
+  const labels = [
+    "Ingreso",
+    "1º Semestre",
+    "2º Semestre",
+    "3º Semestre",
+    "4º Semestre",
+    "5º Semestre",
+    "6º Semestre",
+    "7º Semestre",
+    "8º Semestre",
+    "9º Semestre",
+    "10º Semestre"
+  ];
+
+  // Crear columnas para cada semestre
+  labels.forEach((label, i) => {
+    const col = document.createElement('div');
+    col.className = 'semester';
+    col.dataset.semestre = i + 1;
+    col.innerHTML = `<h2>${label}</h2>`;
+    grid.appendChild(col);
+  });
+
+  function getAprobadas() {
+    return JSON.parse(localStorage.getItem('aprobadas') || '[]');
+  }
+
+  function porcentajeAprobadas() {
+    const aprobadas = getAprobadas();
+    // Excluir la práctica supervisada para el cálculo
+    const totalMaterias = materias.filter(m => m.id !== 'practica').length;
+    return (aprobadas.length / totalMaterias) * 100;
+  }
+
+  function updateUI() {
+    const aprobadas = getAprobadas();
+    document.querySelectorAll('.subject').forEach(el => {
+      const id = el.dataset.id;
+      const mat = materias.find(m => m.id === id);
+      if (!mat) return;
+
+      let faltan = [];
+
+      if (mat.requierePorcentaje) {
+        // Requisito especial de porcentaje
+        if (porcentajeAprobadas() < mat.requierePorcentaje) {
+          faltan.push(`Aprobar al menos ${mat.requierePorcentaje}% de las materias`);
+        }
+      } else {
+        // Correlativas normales
+        faltan = mat.requisitos.filter(r => !aprobadas.includes(r));
+      }
+
+      if (faltan.length > 0) {
+        el.classList.add('locked');
+        el.classList.remove('approved');
+        el.setAttribute('data-tooltip', 'Faltan: ' + faltan.map(r => {
+          const matR = materias.find(m => m.id === r);
+          return matR ? matR.nombre : r;
+        }).join(', '));
+      } else {
+        el.classList.remove('locked');
+        el.removeAttribute('data-tooltip');
+        if (aprobadas.includes(id)) el.classList.add('approved');
+        else el.classList.remove('approved');
+      }
+    });
+  }
+
+  function crearMalla() {
+    materias.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'subject';
+      div.textContent = m.nombre;
+      div.dataset.id = m.id;
+      document.querySelector(`.semester[data-semestre='${m.semestre}']`).appendChild(div);
     });
 
-    function getAprobadas() {
-      return JSON.parse(localStorage.getItem("aprobadas") || "[]");
-    }
-
-    function updateUI() {
-      const aprobadas = getAprobadas();
-      document.querySelectorAll(".subject").forEach(el => {
+    document.querySelectorAll('.subject').forEach(el => {
+      el.addEventListener('click', () => {
+        if (el.classList.contains('locked')) return;
         const id = el.dataset.id;
-        const mat = materias.find(m => m.id === id);
-        const faltan = mat.requisitos.filter(r => !aprobadas.includes(r));
-        if (faltan.length > 0) {
-          el.classList.add("locked");
-          el.classList.remove("approved");
-          const nombres = faltan.map(r => materias.find(m => m.id === r).nombre);
-          el.setAttribute("data-tooltip", "Faltan: " + nombres.join(", "));
+        let aprobadas = getAprobadas();
+        if (aprobadas.includes(id)) {
+          aprobadas = aprobadas.filter(x => x !== id);
         } else {
-          el.classList.remove("locked");
-          el.removeAttribute("data-tooltip");
-          if (aprobadas.includes(id)) el.classList.add("approved");
-          else el.classList.remove("approved");
+          aprobadas.push(id);
         }
+        localStorage.setItem('aprobadas', JSON.stringify(aprobadas));
+        updateUI();
       });
-    }
+    });
 
-    function crearMalla() {
-      materias.forEach(m => {
-        const div = document.createElement("div");
-        div.className = "subject";
-        div.textContent = m.nombre;
-        div.dataset.id = m.id;
-        document.querySelector(`.semester[data-semestre='${m.semestre}']`).appendChild(div);
-      });
+    updateUI();
+  }
 
-      document.querySelectorAll(".subject").forEach(el => {
-        el.addEventListener("click", () => {
-          if (el.classList.contains("locked")) return;
-          const id = el.dataset.id;
-          let aprobadas = getAprobadas();
-          if (aprobadas.includes(id)) {
-            aprobadas = aprobadas.filter(x => x !== id);
-          } else {
-            aprobadas.push(id);
-          }
-          localStorage.setItem("aprobadas", JSON.stringify(aprobadas));
-          updateUI();
-        });
-      });
-      updateUI();
-    }
+  crearMalla();
 
-    crearMalla();
-  </script>
+</script>
 </body>
 </html>
 
